@@ -35,17 +35,20 @@ app.post('/api/shorturl', express.urlencoded({ extended: false }), async functio
   if (!url) {
     return res.status(400).json({ error: 'URL is required' });
   }
-  // Validate the URL format
+  // Validate the URL format using regex
+  const httpRegex = /^(http|https)(:\/\/)/;
+if (!httpRegex.test(url)) {return res.json({ error: 'invalid url' })}
+  // Extract hostname from the URL
   let hostname;
   try {
     hostname = new URL(url).hostname;
   } catch (e) {
-    return res.status(400).json({ error: 'Invalid URL' });
+    return res.status(400).json({error: 'invalid url'});
   }
   // Check if the URL is DNS resolvable
   dns.lookup(hostname, { all: false }, async (err) => {
     if (err) {
-      return res.status(400).json({ error: 'Invalid URL' });
+      return res.status(400).json({error: 'invalid url'});
     }
     try {
       // If valid, check db for existing URL
